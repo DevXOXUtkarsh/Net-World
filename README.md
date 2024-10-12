@@ -1,40 +1,32 @@
-# Welcome to Remix!
+# Net-World
 
-- 📖 [Remix docs](https://remix.run/docs)
+Net-World is a comprehensive project integrating features inspired by Telegram and Instagram, designed for real-time messaging, file sharing, and social interaction.
 
-## Development
+## Features
+- **Real-time Chatting**: Supports messages, media, and file sharing.
+- **User Profiles**: Customize profiles similar to Instagram.
+- **Reels & Stories**: Watch and share reels, stories, and updates.
+- **Channels & Groups**: Create and manage large groups and channels.
+- **Media Sharing**: Send photos, videos, and files within chats.
+- **Project Uploads**: Allow users to upload and comment on projects.
 
-Run the dev server:
+## Installation
 
-```shellscript
-npm run dev
-```
+To clone the repository and start working locally:
 
-## Deployment
+1. Clone the repository:
+    ```bash
+    git clone https://github.com/DevXOXUtkarsh/Net-World.git
+    ```
 
-First, build your app for production:
+2. Navigate into the project directory:
+    ```bash
+    cd Net-World
+    ```
 
-```sh
-npm run build
-```
+3. Install dependencies (if applicable).
 
-Then run the app in production mode:
+4. Start the development server.
 
-```sh
-npm start
-```
-
-Now you'll need to pick a host to deploy it to.
-
-### DIY
-
-If you're familiar with deploying Node applications, the built-in Remix app server is production-ready.
-
-Make sure to deploy the output of `npm run build`
-
-- `build/server`
-- `build/client`
-
-## Styling
-
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever css framework you prefer. See the [Vite docs on css](https://vitejs.dev/guide/features.html#css) for more information.
+## License
+This project is licensed under the MIT License.
