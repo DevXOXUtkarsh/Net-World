@@ -1,0 +1,34 @@
+import { createRouter } from '@/core/.marblism/zenstack/routers'
+import { AuthenticationServer } from '@/core/authentication/server'
+import { ConfigurationServer } from '@/core/configuration/server'
+import { Trpc } from '@/core/trpc/base'
+import { AiServer } from '@/plugins/ai/server'
+import { EmailServer } from '@/plugins/email/server'
+import { UploadServer } from '@/plugins/upload/server'
+
+import { PwaServer } from '~/plugins/pwa/server'
+
+import { CrawlServer } from '~/plugins/crawl/server'
+
+import { DocumentProcessorServer } from '~/plugins/documentProcessor/server'
+
+export const appRouter = Trpc.mergeRouters(
+  createRouter(Trpc.createRouter, Trpc.procedurePublic),
+
+  // the custom router, add your own routers here
+  Trpc.createRouter({
+    authentication: AuthenticationServer.trpcRouter,
+    configuration: ConfigurationServer.trpcRouter,
+    upload: UploadServer.trpcRouter,
+    ai: AiServer.trpcRouter,
+    email: EmailServer.trpcRouter,
+
+    crawl: CrawlServer.trpcRouter,
+
+    documentProcessor: DocumentProcessorServer.trpcRouter,
+
+    pwa: PwaServer.trpcRouter,
+  }),
+)
+
+export type AppRouter = typeof appRouter

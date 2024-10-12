@@ -1,0 +1,182 @@
+enum UserStatus {
+    INVITED
+    VERIFIED
+}
+
+model User {
+    id                             String                    @id @default(uuid())
+    name                           String?
+    email                          String?                   @unique
+    pictureUrl                     String?                   @default('https://i.imgur.com/ZdJSK3Y.jpeg')
+    tokenInvitation                String?
+
+    status                         UserStatus                @default(VERIFIED)
+
+    // this is the role of the user for the application
+    globalRole                     String                    @default('USER')
+    password                       String?                   @password @omit
+    createdAt                      DateTime                  @default(now())
+    updatedAt                      DateTime                  @updatedAt @default(now())
+
+    organizationRoles              OrganizationRole[]
+
+    pwaSubscriptions               PwaSubscription[]         @relation("user")
+
+    conversationsAsCreatedBy       Conversation[]            @relation("createdBy")
+    conversationParticipants       ConversationParticipant[] @relation("user")
+    messagesAsSenderUser           Message[]                 @relation("senderUser")
+    messageReceiptsAsRecipientUser MessageReceipt[]          @relation("recipientUser")
+    statusUpdates                  StatusUpdate[]            @relation("user")
+    contacts                       Contact[]                 @relation("user")
+    contactsAsContactUser          Contact[]                 @relation("contactUser")
+
+    @@auth()
+    @@allow("all", auth().id == this.id)
+    @@allow('all', auth().globalRole == 'ADMIN')
+
+    //we only allow that user to register if they don't create an admin role
+    @@allow("create", globalRole != 'ADMIN')
+    @@allow("read", true)
+}
+
+model Conversation {
+
+    id                       String                    @id @default(uuid())
+    isGroup                  Boolean?
+    name                     String?
+    iconUrl                  String?
+
+    createdById              String
+    createdBy                User?                     @relation(fields: [createdById], references: [id], name: "createdBy")
+
+    conversationParticipants ConversationParticipant[] @relation("conversation")
+    messages                 Message[]                 @relation("conversation")
+    createdAt                DateTime                  @default(now())
+    updatedAt                DateTime                  @updatedAt @default(now())
+    @@allow("all", true)
+}
+
+model ConversationParticipant {
+
+    id             String        @id @default(uuid())
+    isAdmin        Boolean?
+
+    conversationId String
+    conversation   Conversation? @relation(fields: [conversationId], references: [id], name: "conversation")
+    userId         String
+    user           User?         @relation(fields: [userId], references: [id], name: "user")
+
+    createdAt      DateTime      @default(now())
+    updatedAt      DateTime      @updatedAt @default(now())
+    @@allow("all", true)
+}
+
+model Message {
+
+    id              String           @id @default(uuid())
+    content         String?
+    messageType     String?
+    mediaUrl        String?
+    sentAt          String?
+
+    conversationId  String
+    conversation    Conversation?    @relation(fields: [conversationId], references: [id], name: "conversation")
+    senderUserId    String
+    senderUser      User?            @relation(fields: [senderUserId], references: [id], name: "senderUser")
+
+    messageReceipts MessageReceipt[] @relation("message")
+    createdAt       DateTime         @default(now())
+    updatedAt       DateTime         @updatedAt @default(now())
+    @@allow("all", true)
+}
+
+model MessageReceipt {
+
+    id              String   @id @default(uuid())
+    status          String?
+    statusAt        String?
+
+    messageId       String
+    message         Message? @relation(fields: [messageId], references: [id], name: "message")
+    recipientUserId String
+    recipientUser   User?    @relation(fields: [recipientUserId], references: [id], name: "recipientUser")
+
+    createdAt       DateTime @default(now())
+    updatedAt       DateTime @updatedAt @default(now())
+    @@allow("all", true)
+}
+
+model StatusUpdate {
+
+    id             String   @id @default(uuid())
+    content        String?
+    mediaUrl       String?
+    privacySetting String?
+
+    userId         String
+    user           User?    @relation(fields: [userId], references: [id], name: "user")
+
+    createdAt      DateTime @default(now())
+    updatedAt      DateTime @updatedAt @default(now())
+    @@allow("all", true)
+}
+
+model Contact {
+
+    id            String   @id @default(uuid())
+    contactName   String?
+
+    userId        String
+    user          User?    @relation(fields: [userId], references: [id], name: "user")
+    contactUserId String
+    contactUser   User?    @relation(fields: [contactUserId], references: [id], name: "contactUser")
+
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @updatedAt @default(now())
+    @@allow("all", true)
+}
+
+model Organization {
+    id         String             @id @default(uuid())
+    name       String
+    pictureUrl String?            @default('https://i.imgur.com/BgkFiid.jpeg')
+
+    createdAt  DateTime           @default(now())
+    updatedAt  DateTime           @updatedAt @default(now())
+    roles      OrganizationRole[]
+
+    @@allow('all', auth().globalRole == 'ADMIN')
+    @@allow('all', roles?[user == auth() && name == 'owner'])
+    @@allow('read', roles?[user == auth()])
+}
+
+model OrganizationRole {
+    id             String       @id @default(uuid())
+    name           String
+    createdAt      DateTime     @default(now())
+    updatedAt      DateTime     @updatedAt @default(now())
+
+    userId         String       @default(auth().id)
+    user           User         @relation(fields: [userId], references: [id])
+    organizationId String
+    organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+    @@allow('all', auth().globalRole == 'ADMIN')
+    @@allow('all', organization.roles?[user == auth() && name == 'owner'])
+    @@allow('create', organization.roles?[user == auth()] && name != 'owner')
+    @@allow('read', organization.roles?[user == auth()])
+    @@allow('delete', auth() == user)
+}
+
+model PwaSubscription {
+    id        String   @id @default(uuid())
+    content   String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt @default(now())
+
+    userId    String   @default(auth().id)
+    user      User     @relation(fields: [userId], references: [id], name: 'user')
+
+    @@allow("all", true)
+}
+
