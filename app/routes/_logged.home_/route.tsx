@@ -48,7 +48,7 @@ export default function HomePage() {
       where: {
         user: {
           id: {
-            in: user?.contacts?.map(contact => contact.contactUserId) || [],
+            in: [], // This should be replaced with a proper query to fetch contact user IDs
           },
         },
       },
@@ -62,19 +62,15 @@ export default function HomePage() {
     })
 
   useEffect(() => {
-    const { unsubscribe } = SocketClient.useEvent('new-message', () => {
+    SocketClient.useEvent('new-message', () => {
       refetchChats()
     })
-
-    return () => unsubscribe()
   }, [refetchChats])
 
   useEffect(() => {
-    const { unsubscribe } = SocketClient.useEvent('new-status', () => {
+    SocketClient.useEvent('new-status', () => {
       refetchStatuses()
     })
-
-    return () => unsubscribe()
   }, [refetchStatuses])
 
   const handleChatClick = (chatId: string) => {
